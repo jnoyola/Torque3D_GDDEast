@@ -1,9 +1,4 @@
-[submodule "Game"]
-	path = Game
-	url = https://github.com/jnoyola/Game.git
-[submodule "Group Projects/Game"]
-	path = Group Projects/Game
-	url = https://github.com/jnoyola/Game.git
+
 [submodule "GroupProjects"]
 	path = GroupProjects
 	url = https://github.com/jnoyola/GroupProjects.git
