@@ -20,7 +20,7 @@ Here are some examples:
 </entries>
 -->
 <entries>
-  <entry type="projectDirectory" path="Group Projects" args="">Group Projects</entry>
+  <entry type="projectDirectory" path="GroupProjects" args="">Group Projects</entry>
   <entry type="projectDirectory" path="My Projects" args="">My Projects</entry>
   <entry type="projectDirectory" path="Games" args="">Games</entry>
   <entry type="projectDirectory" path="Demos" args="">Demos</entry>
