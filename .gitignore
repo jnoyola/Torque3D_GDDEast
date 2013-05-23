@@ -169,6 +169,7 @@ pip-log.txt
 console.log
 *.cached.dts
 !Engine/bin
+Group Projects/
 My Projects/
 # Project Manager.exe
 # projects.xml
