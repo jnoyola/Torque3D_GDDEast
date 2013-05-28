@@ -50,6 +50,7 @@ class PhysicalZone : public SceneObject
 
    F32        mVelocityMod;
    F32        mGravityMod;
+   F32        mAirResistanceMod;
    Point3F    mAppliedForce;
 
    // Basically ripped from trigger
@@ -83,6 +84,7 @@ class PhysicalZone : public SceneObject
 
    inline F32 getVelocityMod() const      { return mVelocityMod; }
    inline F32 getGravityMod()  const      { return mGravityMod;  }
+   inline F32 getAirResistanceMod()  const      { return mAirResistanceMod;  }
    inline const Point3F& getForce() const { return mAppliedForce; }
 
    void setPolyhedron(const Polyhedron&);

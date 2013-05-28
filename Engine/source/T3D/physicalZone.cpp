@@ -99,6 +99,7 @@ PhysicalZone::PhysicalZone()
 
    mVelocityMod = 1.0f;
    mGravityMod  = 1.0f;
+   mAirResistanceMod  = 1.0f;
    mAppliedForce.set(0, 0, 0);
 
    mConvexList = new Convex;
@@ -123,6 +124,7 @@ void PhysicalZone::initPersistFields()
    addGroup("Misc");
    addField("velocityMod",  TypeF32,               Offset(mVelocityMod,  PhysicalZone), "Multiply velocity of objects entering zone by this value every tick.");
    addField("gravityMod",   TypeF32,               Offset(mGravityMod,   PhysicalZone), "Gravity in PhysicalZone. Multiplies against standard gravity.");
+   addField("airResistanceMod",   TypeF32,         Offset(mAirResistanceMod,   PhysicalZone), "Air resistance in PhysicalZone. Multiplies against standard air resistance.");
    addField("appliedForce", TypePoint3F,           Offset(mAppliedForce, PhysicalZone), "Three-element floating point value representing forces in three axes to apply to objects entering PhysicalZone.");
    addField("polyhedron",   TypeTriggerPolyhedron, Offset(mPolyhedron,   PhysicalZone),
       "The polyhedron type is really a quadrilateral and consists of a corner"
@@ -145,6 +147,10 @@ bool PhysicalZone::onAdd()
    if (mGravityMod < -40.0f || mGravityMod > 40.0f) {
       Con::errorf("PhysicalZone: GravityMod out of range.  [-40, 40]");
       mGravityMod = mGravityMod < -40.0f ? -40.0f : 40.0f;
+   }
+   if (mAirResistanceMod < -40.0f || mAirResistanceMod > 40.0f) {
+      Con::errorf("PhysicalZone: AirResistanceMod out of range.  [-40, 40]");
+      mAirResistanceMod = mAirResistanceMod < -40.0f ? -40.0f : 40.0f;
    }
    static const char* coordString[] = { "x", "y", "z" };
    F32* p = mAppliedForce;
@@ -269,6 +275,7 @@ U32 PhysicalZone::packUpdate(NetConnection* con, U32 mask, BitStream* stream)
 
       stream->write(mVelocityMod);
       stream->write(mGravityMod);
+      stream->write(mAirResistanceMod);
       mathWrite(*stream, mAppliedForce);
       stream->writeFlag(mActive);
    } else {
@@ -316,6 +323,7 @@ void PhysicalZone::unpackUpdate(NetConnection* con, BitStream* stream)
 
       stream->read(&mVelocityMod);
       stream->read(&mGravityMod);
+      stream->read(&mAirResistanceMod);
       mathRead(*stream, &mAppliedForce);
 
       setPolyhedron(tempPH);

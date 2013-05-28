@@ -44,6 +44,7 @@ struct ContainerQueryInfo
         waterDensity(0.0f),
         waterViscosity(0.0f),
         gravityScale(1.0f),
+        airResistanceScale(1.0f),
         appliedForce(0,0,0),
         box(-1,-1,-1,1,1,1),
         mass(1.0f),
@@ -60,6 +61,7 @@ struct ContainerQueryInfo
    F32 waterViscosity;
    String liquidType;
    F32 gravityScale;
+   F32 airResistanceScale;
    Point3F appliedForce;
    WaterObject *waterObject;
 };

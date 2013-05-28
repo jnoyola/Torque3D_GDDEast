@@ -1615,6 +1615,7 @@ void ShapeBase::updateContainer()
               ( 1.0f - info.waterCoverage ) * mDataBlock->drag;
       mBuoyancy = (info.waterDensity / mDataBlock->density) * info.waterCoverage;
    }
+   mDrag *= info.airResistanceScale;
 
    mAppliedForce = info.appliedForce;
    mGravityMod = info.gravityScale;

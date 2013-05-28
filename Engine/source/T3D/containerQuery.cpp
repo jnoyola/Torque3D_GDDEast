@@ -91,6 +91,7 @@ void physicalZoneFind(SceneObject* obj, void *key)
 
    if (pz->isActive()) {
       info->gravityScale *= pz->getGravityMod();
+	  info->airResistanceScale *= pz->getAirResistanceMod();
       info->appliedForce += pz->getForce();
    }
 }
