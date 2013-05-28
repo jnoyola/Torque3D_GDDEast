@@ -1097,7 +1097,7 @@ void WheeledVehicle::updateForces(F32 dt)
       mRigid.atRest = false;
 
    // Gravity
-   mRigid.force += Point3F(0, 0, sWheeledVehicleGravity * mRigid.mass);
+   mRigid.force += Point3F(0, 0, sWheeledVehicleGravity * mGravityMod * mRigid.mass);
 
    // Integrate and update velocity
    mRigid.linMomentum += mRigid.force * dt;
