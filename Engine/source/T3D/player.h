@@ -579,6 +579,9 @@ protected:
    /// Standing / Crouched / Prone or Swimming   
    Pose getPose() const { return mPose; }
    virtual const char* getPoseName() const;
+
+   /// Falling?
+   bool isFloating();
    
    /// Setting this from script directly might not actually work,
    /// This is really just a helper for the player class so that its bounding box

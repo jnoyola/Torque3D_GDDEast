@@ -244,6 +244,7 @@ protected:
 
    Point3F  mCurrPosition;
    Point3F  mCurrVelocity;
+   F32		mCurrGravity;
    S32      mSourceObjectId;
    S32      mSourceObjectSlot;
 

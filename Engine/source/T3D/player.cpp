@@ -2419,6 +2419,18 @@ const char* Player::getPoseName() const
    return EngineMarshallData< PlayerPose >(getPose());
 }
 
+bool Player::isFloating()
+{
+   VectorF contactNormal(0,0,0);
+   bool jumpSurface = false, runSurface = false;
+   if ( !isMounted() ) {
+      findContact( &runSurface, &jumpSurface, &contactNormal );
+	  if (contactNormal.isZero())
+	     return true;
+   }
+   return false;
+}
+
 void Player::setPose( Pose pose )
 {
    // Already the set pose, return.
@@ -6366,6 +6378,14 @@ DefineEngineMethod( Player, getPose, const char*, (),,
    "@return The current pose; one of: \"Stand\", \"Sprint\", \"Crouch\", \"Prone\", \"Swim\"\n" )
 {
    return object->getPoseName();
+}
+
+DefineEngineMethod( Player, isFloating, bool, (),,
+   "@brief Get whether or not the player is floating in mid-air.\n\n"
+
+   "@return The floating state (true or false)\n" )
+{
+   return object->isFloating();
 }
 
 DefineEngineMethod( Player, allowAllPoses, void, (),,

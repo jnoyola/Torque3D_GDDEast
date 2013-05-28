@@ -1072,9 +1072,16 @@ void Projectile::simulate( F32 dt )
    Point3F oldPosition;
    Point3F newPosition;
 
+   // Check if the projectile is in a Physical Zone
+   ContainerQueryInfo info;
+   info.box = Box3F(mCurrPosition.x, mCurrPosition.y, mCurrPosition.z, mCurrPosition.x, mCurrPosition.y, mCurrPosition.z);
+   info.mass = 0.0;
+   mContainer->findObjects(info.box, WaterObjectType|PhysicalZoneObjectType,findRouter,&info);
+   mCurrGravity = info.gravityScale;
+
    oldPosition = mCurrPosition;
    if ( mDataBlock->isBallistic )
-      mCurrVelocity.z -= 9.81 * mDataBlock->gravityMod * dt;
+      mCurrVelocity.z -= 9.81 * mDataBlock->gravityMod * mCurrGravity * dt;
 
    newPosition = oldPosition + mCurrVelocity * dt;
 
