@@ -91,6 +91,8 @@ public:
 
    /// Should this projectile fall/rise different than a default object?
    F32 gravityMod;
+   /// Should this projectile slow different than a default object?
+   F32 airResistanceMod;
 
    /// How long the projectile should exist before deleting itself
    U32 lifetime;     // all times are internally represented as ticks
@@ -244,7 +246,6 @@ protected:
 
    Point3F  mCurrPosition;
    Point3F  mCurrVelocity;
-   F32		mCurrGravity;
    S32      mSourceObjectId;
    S32      mSourceObjectSlot;
 

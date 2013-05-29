@@ -87,6 +87,7 @@ ConsoleDocClass( ProjectileData,
 		   "bounceFriction = 0.3;\n"
 		   "isBallistic = true;\n"
 		   "gravityMod = 0.9;\n"
+		   "airResistanceMod = 0.8;\n"
 
 		   "lightDesc = GrenadeLauncherLightDesc;\n"
 
@@ -171,6 +172,7 @@ ProjectileData::ProjectileData()
    maintainSeq = -1;
 
    gravityMod = 1.0;
+   airResistanceMod = 0.5f;
    bounceElasticity = 0.999f;
    bounceFriction = 0.3f;
 
@@ -229,7 +231,7 @@ void ProjectileData::initPersistFields()
       "@brief LightDescription datablock used for lights attached to the projectile.\n\n");
 
    addField("isBallistic", TypeBool, Offset(isBallistic, ProjectileData),
-      "@brief Detetmines if the projectile should be affected by gravity and whether or not "
+      "@brief Detetmines if the projectile should be affected by gravity and air resistance and whether or not "
       "it bounces before exploding.\n\n");
 
    addField("velInheritFactor", TypeF32, Offset(velInheritFactor, ProjectileData),
@@ -273,6 +275,11 @@ void ProjectileData::initPersistFields()
       "The larger this value is, the more that gravity will affect the projectile. "
       "A value of 1.0 will assume \"normal\" influence upon it.\n"
       "The magnitude of gravity is assumed to be 9.81 m/s/s\n\n"
+      "@note ProjectileData::isBallistic must be true for this to have any affect.");
+   addField("airResistanceMod", TypeF32, Offset(airResistanceMod, ProjectileData ),
+      "@brief Scales the influence of air resistance on the projectile.\n\n"
+      "The larger this value is, the more that air resistance will affect the projectile. "
+      "A value of 1.0 will assume \"normal\" influence upon it.\n\n"
       "@note ProjectileData::isBallistic must be true for this to have any affect.");
 
    Parent::initPersistFields();
@@ -409,6 +416,7 @@ void ProjectileData::packData(BitStream* stream)
    if(stream->writeFlag(isBallistic))
    {
       stream->write(gravityMod);
+      stream->write(airResistanceMod);
       stream->write(bounceElasticity);
       stream->write(bounceFriction);
    }
@@ -469,6 +477,7 @@ void ProjectileData::unpackData(BitStream* stream)
    if(isBallistic)
    {
       stream->read(&gravityMod);
+      stream->read(&airResistanceMod);
       stream->read(&bounceElasticity);
       stream->read(&bounceFriction);
    }
@@ -1058,10 +1067,14 @@ void Projectile::processTick( const Move *move )
 
 void Projectile::simulate( F32 dt )
 {         
-   if ( isServerObject() && mCurrTick >= mDataBlock->lifetime )
+   if ( isServerObject() && mCurrTick >= mDataBlock->lifetime + 3 )
    {
       deleteObject();
       return;
+   }
+   if ( isServerObject() && mCurrTick >= mDataBlock->lifetime )
+   {
+      explode(mCurrPosition, Point3F(0, 0, 1), 0);
    }
    
    if ( mHasExploded )
@@ -1072,16 +1085,20 @@ void Projectile::simulate( F32 dt )
    Point3F oldPosition;
    Point3F newPosition;
 
-   // Check if the projectile is in a Physical Zone
-   ContainerQueryInfo info;
-   info.box = Box3F(mCurrPosition.x, mCurrPosition.y, mCurrPosition.z, mCurrPosition.x, mCurrPosition.y, mCurrPosition.z);
-   info.mass = 0.0;
-   mContainer->findObjects(info.box, WaterObjectType|PhysicalZoneObjectType,findRouter,&info);
-   mCurrGravity = info.gravityScale;
-
    oldPosition = mCurrPosition;
-   if ( mDataBlock->isBallistic )
-      mCurrVelocity.z -= 9.81 * mDataBlock->gravityMod * mCurrGravity * dt;
+   if ( mDataBlock->isBallistic ) {
+	   // Check if the projectile is in a Physical Zone
+	   ContainerQueryInfo info;
+	   info.box = Box3F(mCurrPosition.x, mCurrPosition.y, mCurrPosition.z, mCurrPosition.x, mCurrPosition.y, mCurrPosition.z);
+	   info.mass = 0.0;
+	   mContainer->findObjects(info.box, WaterObjectType|PhysicalZoneObjectType,findRouter,&info);
+
+		// Apply gravity
+      mCurrVelocity.z -= 9.81 * mDataBlock->gravityMod * info.gravityScale * dt;
+
+		// Apply air resistance
+		mCurrVelocity -= mCurrVelocity * mDataBlock->airResistanceMod * info.airResistanceScale * dt;
+   }
 
    newPosition = oldPosition + mCurrVelocity * dt;
 
