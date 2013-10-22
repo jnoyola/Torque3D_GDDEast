@@ -1198,6 +1198,7 @@ void ProcessedShaderMaterial::setBuffers( GFXVertexBufferHandleBase *vertBuffer,
    GFXVertexBufferDataHandle instVB;
    instVB.set( GFX, instFormat->getSizeInBytes(), instFormat, instCount, GFXBufferTypeVolatile );
    U8 *dest = instVB.lock();
+   if(!dest) return;
    dMemcpy( dest, mInstancingState->getBuffer(), instFormat->getSizeInBytes() * instCount );
    instVB.unlock();
 
@@ -1256,7 +1257,7 @@ MaterialParameterHandle* ProcessedShaderMaterial::getMaterialParameterHandle(con
 /// This is here to deal with the differences between ProcessedCustomMaterials and ProcessedShaderMaterials.
 GFXShaderConstBuffer* ProcessedShaderMaterial::_getShaderConstBuffer( const U32 pass )
 {   
-   if (pass < mPasses.size())
+   if (mCurrentParams && pass < mPasses.size())
    {
       return static_cast<ShaderMaterialParameters*>(mCurrentParams)->getBuffer(pass);
    }
