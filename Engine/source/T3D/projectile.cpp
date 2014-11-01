@@ -327,9 +327,9 @@ bool ProjectileData::preload(bool server, String &errorStr)
          if (Sim::findObject(decalId, decal) == false)
             Con::errorf(ConsoleLogEntry::General, "ProjectileData::preload: Invalid packet, bad datablockId(decal): %d", decalId);
 
-      String errorStr;
-      if( !sfxResolve( &sound, errorStr ) )
-         Con::errorf(ConsoleLogEntry::General, "ProjectileData::preload: Invalid packet: %s", errorStr.c_str());
+      String sfxErrorStr;
+      if( !sfxResolve( &sound, sfxErrorStr ) )
+         Con::errorf(ConsoleLogEntry::General, "ProjectileData::preload: Invalid packet: %s", sfxErrorStr.c_str());
 
       if (!lightDesc && lightDescId != 0)
          if (Sim::findObject(lightDescId, lightDesc) == false)
@@ -559,6 +559,7 @@ S32 ProjectileData::scaleValue( S32 value, bool down )
 //
 Projectile::Projectile()
  : mPhysicsWorld( NULL ),
+   mDataBlock( NULL ),
    mCurrPosition( 0, 0, 0 ),
    mCurrVelocity( 0, 0, 1 ),
    mSourceObjectId( -1 ),
@@ -705,6 +706,12 @@ bool Projectile::onAdd()
 {
    if(!Parent::onAdd())
       return false;
+
+   if( !mDataBlock )
+   {
+      Con::errorf("Projectile::onAdd - Fail - Not datablock");
+      return false;
+   }
 
    if (isServerObject())
    {
@@ -1020,7 +1027,7 @@ void Projectile::explode( const Point3F &p, const Point3F &n, const U32 collideT
 
       // Client (impact) decal.
       if ( mDataBlock->decal )     
-         gDecalManager->addDecal( p, n, 0.0f, mDataBlock->decal );
+         gDecalManager->addDecal(p, n, mRandF(0.0f, M_2PI_F), mDataBlock->decal);
 
       // Client object
       updateSound();
@@ -1134,7 +1141,6 @@ void Projectile::simulate( F32 dt )
       xform.setColumn( 3, rInfo.point );
       setTransform( xform );
       mCurrPosition    = rInfo.point;
-      mCurrVelocity    = Point3F::Zero;
 
       // Get the object type before the onCollision call, in case
       // the object is destroyed.
@@ -1165,7 +1171,10 @@ void Projectile::simulate( F32 dt )
       onCollision( rInfo.point, rInfo.normal, rInfo.object );
       // Next order of business: do we explode on this hit?
       if ( mCurrTick > mDataBlock->armingDelay || mDataBlock->armingDelay == 0 )
+      {
+         mCurrVelocity    = Point3F::Zero;
          explode( rInfo.point, rInfo.normal, objectType );
+      }
 
       if ( mDataBlock->isBallistic )
       {
@@ -1185,6 +1194,10 @@ void Projectile::simulate( F32 dt )
          // will apply on the next frame.
          //F32 timeLeft = 1.0f - rInfo.t;
          newPosition = oldPosition = rInfo.point + rInfo.normal * 0.05f;
+      }
+      else
+      {
+         mCurrVelocity    = Point3F::Zero;
       }
    }
 

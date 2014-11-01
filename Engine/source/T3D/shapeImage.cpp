@@ -203,7 +203,7 @@ ShapeBaseImageData::ShapeBaseImageData()
    scriptAnimTransitionTime = 0.25f;
 
    //
-   for (int i = 0; i < MaxStates; i++) {
+   for (S32 i = 0; i < MaxStates; i++) {
       stateName[i] = 0;
 
       stateTransitionLoaded[i] = 0;
@@ -462,7 +462,10 @@ bool ShapeBaseImageData::preload(bool server, String &errorStr)
             Torque::FS::FileNodeRef    fileRef = Torque::FS::GetFileNode(shape[i].getPath());
 
             if (!fileRef)
+            {
+               errorStr = String::ToString("ShapeBaseImageData: Couldn't load shape \"%s\"",name);
                return false;
+            }
 
             if(server)
             {
@@ -685,10 +688,6 @@ void ShapeBaseImageData::initPersistFields()
       "@note Read about the animateOnServer field as you may want to set it to true if you're using useEyeNode.\n\n"
       "@see eyeOffset\n\n"
       "@see animateOnServer\n\n");
-
-   addField( "correctMuzzleVector", TypeBool,  Offset(correctMuzzleVector, ShapeBaseImageData),
-      "@brief Flag to adjust the aiming vector to the eye's LOS point.\n\n"
-      "@see ShapeBase::getMuzzleVector()" );
 
    addField( "correctMuzzleVector", TypeBool,  Offset(correctMuzzleVector, ShapeBaseImageData),
       "@brief Flag to adjust the aiming vector to the eye's LOS point when in 1st person view.\n\n"
@@ -3061,7 +3060,7 @@ TICKAGAIN:
 
       if (image.spinThread[i])
       {
-         float timeScale;
+         F32 timeScale;
 
          switch (stateData.spin) 
          {

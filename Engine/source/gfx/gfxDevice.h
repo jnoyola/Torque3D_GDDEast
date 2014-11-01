@@ -54,6 +54,9 @@
 #include "math/util/frustum.h"
 #endif
 
+#ifndef _PLATFORM_PLATFORMTIMER_H_
+#include "platform/platformTimer.h"
+#endif
 
 class FontRenderBatcher;
 class GFont;
@@ -209,6 +212,12 @@ public:
       
       /// The device is about to finish rendering a frame
       deEndOfFrame,
+
+      /// The device has started rendering a frame's field (such as for side-by-side rendering)
+      deStartOfField,
+
+      /// The device is about to finish rendering a frame's field
+      deEndOfField,
    };
 
    typedef Signal <bool (GFXDeviceEventType)> DeviceEventSignal;
@@ -695,7 +704,7 @@ public:
    void popActiveRenderTarget();
 
    /// Assign a new active render target.
-   void setActiveRenderTarget( GFXTarget *target );
+   void setActiveRenderTarget( GFXTarget *target, bool updateViewport=true );
 
    /// Returns the current active render target.
    inline GFXTarget* getActiveRenderTarget() { return mCurrentRT; }
@@ -735,6 +744,9 @@ public:
    virtual void clear( U32 flags, ColorI color, F32 z, U32 stencil ) = 0;
    virtual bool beginScene();
    virtual void endScene();
+   virtual void beginField();
+   virtual void endField();
+   PlatformTimer *mFrameTime;
 
    virtual GFXTexHandle & getFrontBuffer(){ return mFrontBuffer[mCurrentFrontBufferIdx]; }
 

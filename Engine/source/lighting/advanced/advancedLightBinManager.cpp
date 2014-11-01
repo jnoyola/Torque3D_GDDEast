@@ -243,7 +243,7 @@ void AdvancedLightBinManager::render( SceneRenderState *state )
       return;
 
    // Get the sunlight. If there's no sun, and no lights in the bins, no draw
-   LightInfo *sunLight = mLightManager->getSpecialLight( LightManager::slSunLightType );
+   LightInfo *sunLight = mLightManager->getSpecialLight( LightManager::slSunLightType, false );
    if( !sunLight && mLightBin.empty() )
       return;
 
@@ -444,7 +444,7 @@ void AdvancedLightBinManager::_deleteLightMaterials()
 void AdvancedLightBinManager::_setupPerFrameParameters( const SceneRenderState *state )
 {
    PROFILE_SCOPE( AdvancedLightBinManager_SetupPerFrameParameters );
-   const Frustum &frustum = state->getFrustum();
+   const Frustum &frustum = state->getCameraFrustum();
 
    MatrixF invCam( frustum.getTransform() );
    invCam.inverse();

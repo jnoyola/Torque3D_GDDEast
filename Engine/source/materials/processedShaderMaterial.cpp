@@ -54,6 +54,7 @@ void ShaderConstHandles::init( GFXShader *shader, CustomMaterial* mat /*=NULL*/ 
    mToneMapTexSC = shader->getShaderConstHandle(ShaderGenVars::toneMap);
    mSpecularColorSC = shader->getShaderConstHandle(ShaderGenVars::specularColor);
    mSpecularPowerSC = shader->getShaderConstHandle(ShaderGenVars::specularPower);
+   mSpecularStrengthSC = shader->getShaderConstHandle(ShaderGenVars::specularStrength);
    mParallaxInfoSC = shader->getShaderConstHandle("$parallaxInfo");
    mFogDataSC = shader->getShaderConstHandle(ShaderGenVars::fogData);
    mFogColorSC = shader->getShaderConstHandle(ShaderGenVars::fogColor);
@@ -284,7 +285,7 @@ void ProcessedShaderMaterial::_determineFeatures(  U32 stageNum,
 {
    PROFILE_SCOPE( ProcessedShaderMaterial_DetermineFeatures );
 
-   const float shaderVersion = GFX->getPixelShaderVersion();
+   const F32 shaderVersion = GFX->getPixelShaderVersion();
    AssertFatal(shaderVersion > 0.0 , "Cannot create a shader material if we don't support shaders");
 
    bool lastStage = stageNum == (mMaxStages-1);
@@ -993,6 +994,7 @@ void ProcessedShaderMaterial::_setShaderConstants(SceneRenderState * state, cons
 
    shaderConsts->setSafe(handles->mSpecularColorSC, mMaterial->mSpecular[stageNum]);   
    shaderConsts->setSafe(handles->mSpecularPowerSC, mMaterial->mSpecularPower[stageNum]);
+   shaderConsts->setSafe(handles->mSpecularStrengthSC, mMaterial->mSpecularStrength[stageNum]);
 
    shaderConsts->setSafe(handles->mParallaxInfoSC, mMaterial->mParallaxScale[stageNum]);   
    shaderConsts->setSafe(handles->mMinnaertConstantSC, mMaterial->mMinnaertConstant[stageNum]);

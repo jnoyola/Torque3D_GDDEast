@@ -156,9 +156,7 @@ void SceneManager::renderScene( ScenePassType passType, U32 objectMask )
    {
       // Store the camera state so if we lock, this will become the
       // locked state.
-
-      if( passType == SPT_Diffuse )
-         smLockedDiffuseCamera = cameraState;
+      smLockedDiffuseCamera = cameraState;
    }
    
    // Create the render state.
@@ -191,7 +189,7 @@ void SceneManager::renderScene( SceneRenderState* renderState, U32 objectMask, S
    // Get the lights for rendering the scene.
 
    PROFILE_START( SceneGraph_registerLights );
-      LIGHTMGR->registerGlobalLights( &renderState->getFrustum(), false );
+      LIGHTMGR->registerGlobalLights( &renderState->getCullingFrustum(), false );
    PROFILE_END();
 
    // If its a diffuse pass, update the current ambient light level.
@@ -242,6 +240,9 @@ void SceneManager::renderScene( SceneRenderState* renderState, U32 objectMask, S
       Point2F projOffset = GFX->getCurrentProjectionOffset();
       Point3F eyeOffset = GFX->getStereoEyeOffset();
 
+      // Indicate that we're about to start a field
+      GFX->beginField();
+
       // Render left half of display
       RectI leftVP = originalVP;
       leftVP.extent.x *= 0.5;
@@ -263,6 +264,12 @@ void SceneManager::renderScene( SceneRenderState* renderState, U32 objectMask, S
       renderStateLeft.setSceneRenderField(0);
 
       renderSceneNoLights( &renderStateLeft, objectMask, baseObject, baseZone );
+
+      // Indicate that we've just finished a field
+      GFX->endField();
+
+      // Indicate that we're about to start a field
+      GFX->beginField();
 
       // Render right half of display
       RectI rightVP = originalVP;
@@ -286,6 +293,9 @@ void SceneManager::renderScene( SceneRenderState* renderState, U32 objectMask, S
       renderStateRight.setSceneRenderField(1);
 
       renderSceneNoLights( &renderStateRight, objectMask, baseObject, baseZone );
+
+      // Indicate that we've just finished a field
+      GFX->endField();
 
       // Restore previous values
       GFX->setWorldMatrix(originalWorld);
@@ -392,7 +402,7 @@ void SceneManager::_renderScene( SceneRenderState* state, U32 objectMask, SceneZ
    // the opportunity to render editor visualizations even if
    // they are otherwise not in view.
 
-   if( !state->getFrustum().getBounds().isOverlapped( state->getRenderArea() ) )
+   if( !state->getCullingFrustum().getBounds().isOverlapped( state->getRenderArea() ) )
    {
       // This handles fringe cases like flying backwards into a zone where you
       // end up pretty much standing on a zone border and looking directly into
@@ -403,7 +413,7 @@ void SceneManager::_renderScene( SceneRenderState* state, U32 objectMask, SceneZ
       return;
    }
 
-   Box3F queryBox = state->getFrustum().getBounds();
+   Box3F queryBox = state->getCullingFrustum().getBounds();
    if( !gEditingMission )
    {
       queryBox.minExtents.setMax( state->getRenderArea().minExtents );
@@ -595,6 +605,7 @@ bool SceneManager::addObjectToScene( SceneObject* object )
 
 void SceneManager::removeObjectFromScene( SceneObject* obj )
 {
+   AssertFatal( obj, "SceneManager::removeObjectFromScene - Object is not declared" );
    AssertFatal( obj->getSceneManager() == this, "SceneManager::removeObjectFromScene - Object not part of SceneManager" );
 
    // Notify the object.
@@ -603,7 +614,8 @@ void SceneManager::removeObjectFromScene( SceneObject* obj )
 
    // Remove the object from the container.
 
-   getContainer()->removeObject( obj );
+   if( getContainer() )
+      getContainer()->removeObject( obj );
 
    // Remove the object from the zoning system.
 
